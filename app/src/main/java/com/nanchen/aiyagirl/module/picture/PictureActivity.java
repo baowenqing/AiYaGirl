@@ -3,6 +3,7 @@ package com.nanchen.aiyagirl.module.picture;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityCompat;
@@ -17,7 +18,6 @@ import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.github.chrisbanes.photoview.PhotoView;
@@ -44,6 +44,7 @@ public class PictureActivity extends BaseActivity implements PictureView{
     public static final String EXTRA_IMAGE_URL = "com.nanchen.aiyagirl.module.picture.PictureActivity.EXTRA_IMAGE_URL";
     public static final String EXTRA_IMAGE_TITLE = "com.nanchen.aiyagirl.module.picture.PictureActivity.EXTRA_IMAGE_TITLE";
     public static final String TRANSIT_PIC = "picture";
+    private Bitmap mBitmap = null;
 
     String mImageUrl, mImageTitle;
     @BindView(R.id.picture_toolbar)
@@ -108,12 +109,14 @@ public class PictureActivity extends BaseActivity implements PictureView{
 
         Glide.with(Utils.getContext())
                 .load(mImageUrl)
+                .asBitmap()
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(new SimpleTarget<GlideDrawable>() {
+                .into(new SimpleTarget<Bitmap>() {
                     @Override
-                    public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
+                    public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
                         hideProgress();
-                        mImgView.setImageDrawable(resource);
+                        mBitmap = bitmap;
+                        mImgView.setImageBitmap(bitmap);
                     }
                 });
 
@@ -125,7 +128,7 @@ public class PictureActivity extends BaseActivity implements PictureView{
 //        Toasty.info(this, "点击了保存图片", Toast.LENGTH_SHORT, true).show();
 
         if (mPresenter != null){
-            mPresenter.saveGirl(mImageUrl,mImgView.getWidth(),mImgView.getHeight(),mImageTitle);
+            mPresenter.saveGirl(mImageUrl, mBitmap, mImageTitle);
         }
     }
 
